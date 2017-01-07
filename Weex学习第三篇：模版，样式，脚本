@@ -1,0 +1,95 @@
+      这两天把官方的教程都看了一遍，总体感觉是信息量很大，但是大部分和iOS原生开发有相似的地方，像UI，touch事件，数据绑定，数据处理等流程都是存在，区别在于语言和语法，虽然知识点，用法，API很多，有的常用的还需要记住，但是只要有耐心，一个一个的克服，结果肯定是好的。而且最近感受最深的是，写出来的博客是要经过自己反复验证的，保证99.99%正确后才能发出来，不能像以前那样跟发相声似的，所以后面出一篇文章可能用3，4天时间也很正常，尤其是在一开始，就有小伙伴支持鼓励，对我影响很大，也加重了我的责任感。
+
+今天我们来介绍一下weex代码的三部分构成：<template>、<style>、<script>
+第一部分：template
+官方解释--必须的，使用 HTML 语法描述页面结构，内容由多个标签组成，不同的标签代表不同的组件。
+可以看出里面其实就是html的代码，像title，body，表单等元素。
+
+第二部分：style
+官方解释--可选的，使用 CSS 语法描述页面的具体展现形式。
+属于样式层，可以自定义class，虽然是可选的，但是建议是必须的，养成好习惯不要把所有代码都写到html里面，这样维护会很麻烦，层次不清晰。
+
+第三部分：script
+官方解释--可选的，使用 JavaScript 描述页面中的数据和页面的行为，Weex 中的数据定义也在 <script> 中进行。
+是数据绑定和点击事件处理，包括数据校验等，处理业务逻辑。
+
+总结下来：这是一个典型的 M-V-VM 架构：通过 ViewModel 把 Model 和 View 建立更直接有效的关系，ViewModel 的实现以 <script> 的内容为主。
+
+数据绑定
+
+接下来再看看官方介绍的数据绑定，
+1.数据绑定路径---就是在template用变量来设置，然后在script里给变量赋值，用双大括号来表示 “ {{ x }} ”
+2.数据绑定表达式---用简单JS的表达式绑定
+
+Weex使用 mustache 的语法 ({{...}}) 来对 <template> 中的模板和 <script> 里的数据进行绑定. 一旦数据额模板绑定了, 数据上的修改会实时的在模板内容中生效。
+
+数据绑定路径
+
+<template>
+  <div>
+    <text style="font-size: {{size}}">{{title}}</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      size: 48,
+      title: 'Alibaba Weex Team'
+    }
+  }
+</script>
+体验一下
+
+上面的代码会把 title 和 size 的数值绑定到模板内容上。
+
+我们也可以通过 . 符号来绑定数据结构中的字段。看一下下面的代码片段：
+
+<template>
+  <div>
+    <text style="font-size: {{title.size}}">{{title.value}}</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      title: {
+        size: 48,
+        value: 'Alibaba Weex Team'
+      }
+    }
+  }
+</script>
+体验一下
+
+数据绑定表达式
+
+进行数据绑定时，Weex 支持一些简单的 JavaScript 表达式，例如：
+
+<template>
+  <div style="flex-direction: row;">
+    <text>{{firstName + ' ' + lastName}}</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      firstName: 'John',
+      lastName: 'Smith'
+    }
+  }
+</script>
+体验一下
+
+这些表达式会在当前的上下文中进行运算。
+
+
+总结：了解template，style，script各个模块的作用，把基础打好，就像刚开始学习MVC模式时，如果能坚持各个模块的代码分离，控制好相互之间调用的权限，对后面的编程会提高很多。
+
+
+参考链接：https://weex-project.io/cn/doc/syntax/data-binding.html
+
+
+
