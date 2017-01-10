@@ -1,0 +1,283 @@
+首先来复习一个重要的知识点：
+
+
+
+根节点：每个 Weex 页面最顶层的节点，我们称为根节点。下面是目前我们支持的三种根节点：
+
+div：普通根节点，有确定的尺寸，不可滚动。
+scroller：可滚动根节点，适用于需要全页滚动的场景。
+list：列表根节点，适用于其中包含重复的子元素的列表场景。
+目前 Weex 仅支持以上三种根节点。
+
+注意事项：template 只支持一个根节点，多个根节点将无法被 Weex 正常的识别和处理。
+
+
+
+本次要学习：
+
+
+
+1.在template中使用class来设置样式。
+
+
+
+2.onclick事件绑定，使用if判断一个标签是否隐藏显示。
+
+
+
+3.repeat在list中使用
+
+
+
+下面我们来看一下具体的使用和范例代码，“体验一下”这个链接可以点击到官方调试网站去看效果。
+
+
+
+一.计算属性 
+
+数据绑定表达式已经非常方便了，但如果希望在模板里实现更复杂的逻辑判断，你也可以使用计算属性。例如：
+
+<template>
+  <div style="flex-direction: row;">
+    <text>{{fullName}}</text>
+    <text onclick="changeName" style="margin-left: 10;">CHANGE NAME</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      firstName: 'John',
+      lastName: 'Smith'
+    },
+    computed: {
+      fullName: function() {
+        return this.firstName + ' ' + this.lastName
+      }
+    },
+    methods: {
+      changeName: function() {
+        this.firstName = 'Terry'
+      }
+    }
+  }
+</script>
+
+体验一下
+
+同样能够达到相同的效果。这里我们引入了一个叫做 fullName 的计算属性，由 firstName 和 lastName 计算而成，在数据绑定的时候，如果 firstName 或 lastName 发生改变，fullName 都会自动重新计算并触发改变。
+
+另外计算属性还支持另外一种写法，就是同时定义一个计算属性的 getter 和 setter，这样的话当下面例子中的 fullName 被赋值时，data 里的 firstName 和 lastName 会被自动改变：
+
+<template>
+  <div style="flex-direction: row;">
+    <text>{{fullName}}</text>
+    <text onclick="changeName" style="margin-left: 10;">CHANGE NAME</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      firstName: 'John',
+      lastName: 'Smith'
+    },
+    computed: {
+      fullName: {
+        get: function() {
+          return this.firstName + ' ' + this.lastName
+        },
+
+        set: function(v) {
+          var s = v.split(' ')
+          this.firstName = s[0]
+          this.lastName = s[1]
+        }
+      }
+    },
+    methods: {
+      changeName: function() {
+        this.fullName = 'Terry King'
+      }
+    }
+  }
+</script>
+
+体验一下
+
+注意事项：data、methods、computed 中的字段是不能相互重复的，因为它们都会通过组件实例的 this访问到。
+
+二.数据绑定在 <template> 中的特殊用法
+
+样式: style 或 class
+
+组件的样式能够通过 style 特性进行绑定：
+
+<template>
+  <div>
+    <text style="font-size: {{size}}; color: {{color}};">Hello World</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      size: 32,
+      color: '#ff0000'
+    }
+  }
+</script>
+
+体验一下
+
+样式也能够通过 class 特性实现样式绑定，多个 class 名通过空格分隔：
+
+<template>
+  <div>
+    <text class="{{size}}">Hello</text>
+    <text class="title {{status}}">World</text>
+  </div>
+</template>
+
+<style>
+  .large { font-size: 64; }
+  .small { font-size: 32; }
+  .title { font-weight: bold; }
+  .success { color: #00ff00; }
+  .error { color: #ff0000; }
+</style>
+
+<script>
+  module.exports = {
+    data: {
+      size: 'large',
+      status: 'success'
+    }
+  }
+</script>
+
+体验一下
+
+在上面的代码中如果 {{size}} 和 {{status}} 是空值, 就只有 class="title" 会被解析。
+
+延伸阅读：style 和 class
+
+三.事件绑定：on...
+
+以 on... 开头的就是用于绑定事件的特性，特性名中 on 之后的部分就是事件的类型，特性的值就是处理该事件的函数名。函数名外不需要添加 mustache 语法中的大括号。例如：
+
+<template>
+  <div>
+    <text onclick="toggle">Toggle: {{result}}</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    data: {
+      result: true
+    },
+    methods: {
+      toggle: function () {
+        this.result = !this.result
+      }
+    }
+  }
+</script>
+
+体验一下
+
+除此之外 Weex 还支持更多的事件处理方式。
+
+延伸阅读：事件处理
+
+四.展示逻辑控制 if & repeat
+
+if 特性能够通过特性值的真假来控制组建是否显示，且 mustache 大括号可以省略。例如：
+
+<template>
+  <div style="flex-direction: column;">
+    <text onclick="toggle">Toggle</text>
+    <image if="{{shown}}" src="{{imageUrl}}" class="logo"></image>
+  </div>
+</template>
+
+<style>
+  .logo { width: 512; height: 512; }
+</style>
+
+<script>
+  module.exports = {
+    data: {
+      shown: true,
+      imageUrl: 'https://gtms02.alicdn.com/tps/i2/TB1QHKjMXXXXXadXVXX20ySQVXX-512-512.png'
+    },
+    methods: {
+      toggle: function () {
+        this.shown = !this.shown
+      }
+    }
+  }
+</script>
+
+体验一下
+
+repeat 特性可以根据一组数组数据重复生成相同或相似的顺序排列的界面。例如：
+
+<template>
+  <div>
+    <text repeat="(k,v) in list">{{k}} - {{v}}</text>
+  </div>
+</template>
+<script>
+  module.exports = {
+    data: {
+      list: ['a', 'b', 'c']
+    }
+  }
+</script>
+
+体验一下
+
+延伸阅读：展示逻辑控制
+
+五.静态模板优化 static 
+
+static 特性可以一次性把数据设置到模板相应的位置上，但是今后不会随着数据的变化而更新。这样可以减少无谓的数据绑定，有效控制和优化长列表、纯静态页面在运行时的开销。不过你也要小心使用不要导致原本需要更新的视图没有触发更新。
+
+<template>
+  <div static>
+    <text>{{ word }}</text>
+  </div>
+</template>
+
+<script>
+  module.exports = {
+    ready: function() {
+      this.word = 'Data changes' // UI won't be updated
+    },
+    data: {
+      word: 'Hello static'
+    }
+  }
+</script>
+
+体验一下
+
+如上所示，添加 static 关键字，渲染结果会是“Hello static”字样，相当于渲染一个静态的节点，ready 函数中对数据 word 的改变不会更新到视图。
+
+
+
+建议大家在最开始的时候多理解核心概念和运作的方式，关键的标签一定要牢记，达到一出现这个标签就知道涵义，如果还要去翻文档才知道意思的话，那效率就太低了。还有一些核心概念一定要了解清楚，包括数据绑定的机制，变量的表示，如果对应关系，以及命名规则等。基础很重要。
+
+
+
+
+
+
+
+
+
+
+
+参考链接：https://weex-project.io/cn/doc/syntax/data-binding.html
