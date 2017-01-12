@@ -1,0 +1,131 @@
+复习上篇文章学习的数据绑定，感觉比较重要的是
+1.计算属性的的使用，类似响应式编程，就是一个变量的值会随着它相关的那个变量的值的变化而变化，不需要去update，比如fullName = firstName+lastName，一个text=fullName，如果firstName变化，那么fullName就会变。
+2.if & repeat使用，if判断这个标签是否显示隐藏，repeat用在数组中生成表格数据类似的场景使用
+
+本次要学习的是css样式和class使用,内联事件处理函数
+
+重点，多个class名使用，在个个类名之间用空格分开 像这样class="title highlight"
+在class里也可以使用变量来代替 像这样class="large {{textClass}}"
+下面来看一下具体官方教程使用
+CSS 样式和类
+基础语法
+CSS 样式可以理解为一系列的键值对，其中的每一对描述了一个特定的样式，例如组件的宽或者高。
+width: 400; height: 50; ...
+键值对的形式是 prop-name: prop-value;。键名是 prop-name，键值是 prop-value。 一般情况下，键名按照连接符的方式进行命名，键和值之间由冒号 : 进行分隔，每对键值之间由分号 ; 进行分隔。
+在 Weex 页面上样式有两种形式：
+<template> 中的 style 特性
+<style> 样式表
+<template> 中的 style 特性
+在 style 特性中编写样式，例如：
+<template>
+  <div style="width: 400; height: 50;">
+    ...
+  </div>
+</template>
+这段代码的意思是 <div> 组件的宽和高分别为 400 像素和 50 像素。
+<style> 样式表
+例如:
+<style>
+  .wrapper { width: 600; }
+  .title { width: 400; height: 50; }
+  .highlight { color: #ff0000; }
+</style>
+样式表包含了多个样式规则，每条规则有一个对应的类，以及由 {...} 包括的若干条样式。例如：
+.title { width: 400; height: 50; }
+class 特性
+<template> 标签中的 class 特性值用来匹配 <style> 样式表中的一个或多个 class 名，多个 class name 之间由空格分隔。例如：
+<template>
+  <div class="wrapper">
+    <text class="title">...</text>
+    <text class="title highlight">...</text>
+  </div></template><style>
+  .wrapper { width: 600; }  .title { width: 400; height: 50; }  .highlight { color: #ff0000; }</style>
+体验一下
+这段代码的含义是 <div> 组件的宽度是 600 像素，两个 <text> 组件的尺寸为 400x50，其中第二个文本组件是红色字。
+注意事项
+为了简化页面设计和实现，屏幕的宽度统一为 750 像素，不同设备屏幕都会按照比例转化为这一尺寸进行长度计算。
+标准 CSS 支持很多样式选择器，但 Weex 目前只支持单个 class name 的选择器。
+标准 CSS 支持很多的长度单位，但 Weex 目前只支持像素，并且 px 单位可以忽略不写，直接使用对应的数值。更多详情请查看通用样式。
+子元素的样式不会继承自父元素，这一点与标准 CSS 不同，比如 color 和 font-size 等样式作用在 <text> 上层的 <div> 上是无效的。
+标准 CSS 包含了非常多的样式属性，但 Weex 只支持了其中的一部分，比如盒模型、flexbox、position 等布局属性，以及 font-size、color 等其它样式。
+与数据绑定结合
+请查阅数据绑定中有关 style 和 class 特性的相关部分。这里简单举个例子：
+<template>
+  <div>
+    <text style="font-size: {{fontSize}};">Alibaba</text>
+    <text class="large {{textClass}}">Weex Team</text>
+  </div></template><style>
+  .large {font-size: 32;}  .highlight {color: #ff0000;}</style><script>
+  module.exports = {
+    data: {
+      fontSize: 32,
+      textClass: 'highlight'
+    }
+  }</script>
+体验一下
+今天看到一个特殊的内联事件处理参数，$event 是默认的事件处理函数的第一个参数，这个参数包含三个属性type，target，timestamp。这个属性是固定存在的，格式也是固定的就是通过$event这样传的。看一下具体用法：
+
+事件处理
+Weex 允许对 <template> 中的元素绑定事件处理函数。
+基本语法
+以 on... 开头的就是用于绑定事件的特性，特性名中 on 之后的部分就是事件的类型，特性的值就是处理该事件的函数名。函数名外不需要添加 mustache 语法中的大括号。例如：
+<template>
+  <div>
+    <text onclick="toggle">Toggle: {{result}}</text>
+  </div></template><script>
+  module.exports = {
+    data: {
+      result: true
+    },
+    methods: {
+      toggle: function () {        this.result = !this.result
+      }
+    }
+  }</script>
+体验一下
+内联事件处理参数
+同时我们也支持在事件绑定的特性值中内联写明被传入的参数。例如：
+<template>
+  <div>
+    <text onclick="update(1, 2)">Result: {{result}}</text>
+  </div></template><script>
+  module.exports = {
+    data: {
+      result: '<empty>'
+    },
+    methods: {
+      update: function (x, y) {        this.result = x + y
+      }
+    }
+  }</script>
+体验一下
+特殊的内联事件处理参数
+额外的，在这种内联的事件绑定写法中，你可以使用一个特殊的参数 $event，代表事件描述对象，即默认事件处理函数的第一个参数。所以 <template> 中的 onclick="foo" 和 onclick="foo($event)" 是等价的，$event 的用法可以更多参考下面的例子
+<template>
+  <div>
+    <text onclick="update($event, 1, 2)">Result: {{result}}</text>
+  </div></template><script>
+  module.exports = {
+    data: {
+      result: '<empty>'
+    },
+    methods: {
+      update: function (e, x, y) {        this.result = e.type + (x + y)
+      }
+    }
+  }</script>
+体验一下
+事件描述对象
+每当一次事件被触发的时候，都会产生一个事件描述对象，该对象会默认作为第一个参数传递给事件处理函数，或以 $event 形参的方式出现在内联事件处理函数中。
+每个事件描述对象至少包含以下几个特性：
+type (string): 事件名称, 如: click
+target (Element): 目标元素
+timestamp (number): 事件触发时的时间戳数字
+
+
+
+参考链接：https://weex-project.io/cn/doc/syntax/display-logic.html
+
+
+
+​
